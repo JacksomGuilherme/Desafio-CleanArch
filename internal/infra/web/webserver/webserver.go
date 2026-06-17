@@ -9,6 +9,7 @@ import (
 
 type Route struct {
 	Method  string
+	Path    string
 	Handler http.HandlerFunc
 }
 
@@ -27,8 +28,10 @@ func NewWebServer(serverPort string) *WebServer {
 }
 
 func (s *WebServer) AddHandler(method string, path string, handler http.HandlerFunc) {
-	s.Handlers[path] = Route{
+	ket := method + ":" + path
+	s.Handlers[ket] = Route{
 		Method:  method,
+		Path:    path,
 		Handler: handler,
 	}
 }
@@ -38,8 +41,8 @@ func (s *WebServer) AddHandler(method string, path string, handler http.HandlerF
 // start the server
 func (s *WebServer) Start() {
 	s.Router.Use(middleware.Logger)
-	for path, route := range s.Handlers {
-		s.Router.Method(route.Method, path, route.Handler)
+	for _, route := range s.Handlers {
+		s.Router.Method(route.Method, route.Path, route.Handler)
 	}
 	http.ListenAndServe(s.WebServerPort, s.Router)
 }
